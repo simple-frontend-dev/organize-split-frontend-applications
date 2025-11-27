@@ -176,7 +176,7 @@ cd ./apps/remote-web-vitals-reporter && pnpm run dev
 
 You can now navigate to http://localhost:8080/home and http://localhost:8080/blog to access your frontend applications. (Do not directly go to localhost:3000 or localhost:4000 otherwise navigation won't work.)
 
-If you open the console and reload the page, you will see the web vitals reporting coming from the rremote web-vitals-reporter module.
+If you open the console and reload the page, you will see the web vitals reporting coming from the remote web-vitals-reporter module.
 
 8. Stop nginx with
 

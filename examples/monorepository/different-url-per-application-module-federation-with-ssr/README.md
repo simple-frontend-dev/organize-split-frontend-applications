@@ -1,16 +1,29 @@
-# Separate Repositories
+# Monorepository
 
-## Different url per application under the same domain
+## Different url per application under the same domain with module federation with SSR
 
-When your applications are live under the same domain but different URLs, for example https://website.com/home and https://website.com/blog, then you will have to use a reverse proxy at some point in your stack to be able to serve the different frontend applications mapped to different repositories.
+This example is very similar to `Different url per application under the same domain with module federation` except that the homepage is using server side rendering.
+
+You can check out `homepage` sources with:
+
+- `server.ts` the entry point for the server (only development mode has been developed for this example)
+- `src/entry-client.ts` has been renamed but not changed, it's still the same client entry point
+- `src/entry-server.ts` has been introduced for SSR mode demo
+- The vite config file at the root has disappeared as it will be loaded by the server.
+
+This is mostly following the [Vite SSR guide](https://vite.dev/guide/ssr) with a vanilla TS setup. The production mode would require to bring back specific config file to bootstrap module federation.
+
+When your applications are live under the same domain but at different URLs, for example https://website.com/home and https://website.com/blog, then you will have to use a reverse proxy at some point in your stack to be able to route the traffic to your different frontend applications. You can still use a monorepository to serve your different frontend applications.
+
+In fact it presents many [advantages](https://www.simplefrontend.dev/blog/why-a-frontend-monorepo/).
 
 The simplest setup you can use to map incoming requests is a dedicated reverse proxy such as [nginx](https://nginx.org/) but you can use any reverse proxy at any point in your stack.
 
-In this example, we have 2 folders `homepage` and `blog` which you can see as 2 different repositories you can host and deploy completely independently and connect their exposed endpoint to your reverse proxy.
+In this example, we have 2 folders `homepage` and `blog` under `apps` which you can see as 2 different repositories you can host and deploy completely independently and connect their exposed endpoint to your reverse proxy.
 
-## When to use?
+## When to use ?
 
-You have distinct apps serving different purposes which are managed by different large teams with good frontend expertise in each and you do not want them to share the same infrastructure.
+You have distinct apps serving different purposes and you want different applications and/or teams to align and share their development setup and practices to encourage reusability and reduce overall efforts on developer experience and dependencies management.
 
 You also want to share runtime dependencies between your apps that you can update without redeploying your apps.
 
@@ -18,18 +31,26 @@ You also want to share runtime dependencies between your apps that you can updat
 
 Pros:
 
-1. Teams will be able to operate in competely autonomy so they are able to choose different tech stacks and release at different paces.
-1. Hosting and deployment of those different applications is simple as one repository maps to one domain.
+1. Streamlined development with shared opininated configurations (Typescript, formatting, linting etc.) that allow developers to focus on delivering business value.
+1. You no longer have to synchronize shared dependencies releases and updates accross many scattered repositories.
+1. Cross team contributions are much easier.
+1. One (possibly virtual) team can focus on operational work (dependency management, security maitenance, local developer experience, CI/CD, devops, etc.), and all teams will benefit from it.
 1. You can release hotfixes and new features for your runtime dependencies without having to synchronize and redeploy all your applications.
 
 Cons:
 
-1. Teams will each have to dedicate time to develop and maintain duplicated infrastructure in terms of dependency management, security maitenance, local developer experience, CI/CD, devops, etc.
-1. Cross team contributions will be more difficult if the tech stacks and code architecture start to diverge.
-1. While possible, sharing static dependencies between those teams (design system, common librairies) will not scale well with the number of dependencies and frontend applications.
+1. You have to invest in the initial setup for example to setup monorepository tooling.
+1. You have to invest into a collaboration model and a proper code architecture for the monorepository (which is a benefit in disguise).
 1. You have to monitor your runtime dependencies like you would for regular applications.
 
 ## Setup
+
+I am using the default workspace setup from pnpm with a `pnpm-workspace.yaml` configuration as follows:
+
+```yaml
+packages:
+  - "apps/*"
+```
 
 `homepage` and `blog` folders under apps each contain a simple Typescript app built with Vite.
 
@@ -43,7 +64,7 @@ export default defineConfig({
   server: {
     port: 3000,
   },
-  base: "/home",
+  base: "/homepage",
   plugins: [
     federation({
       name: "homepage",
@@ -94,8 +115,8 @@ Update your `tsconfig.json` configuration with the paths of the remote runtime d
 
 ```json
 "paths": {
-  "web-vitals-reporter": ["../remote-web-vitals-reporter/src/main.ts"],
-  "banner": ["../remote-banner/src/main.ts"]
+  "web-vitals-reporter": ["./apps/remote-web-vitals-reporter/src/main.ts"],
+  "banner": ["./apps/remote-banner/src/main.ts"]
 }
 ```
 
@@ -126,33 +147,39 @@ Note: you can use the reverse proxy of choice and it can be deployed where you w
 
 ## Demo
 
-1. Open 5 terminal windows to install dependencies and run applications as well as nginx:
-
-2. Homepage host app:
+1. At the base folder, install dependencies:
 
 ```bash
-cd ./homepage && pnpm install && pnpm run dev
+pnpm install
 ```
 
-3. Blog host app:
+2. Open 5 terminal windows to install dependencies and run applications as well as nginx:
+
+3. Homepage host app:
 
 ```bash
-cd ./blog && pnpm install && pnpm run dev
+cd ./apps/homepage && pnpm run dev
 ```
 
-4. Shared remote banner app:
+4. Blog host app:
 
 ```bash
-cd ./remote-banner && pnpm install && pnpm run dev
+cd ./apps/blog && pnpm run dev
 ```
 
-5. Shared remote web-vitals-reporter app:
+5. Shared remote banner app:
 
 ```bash
-cd ./remote-web-vitals-reporter && pnpm install && pnpm run dev
+cd ./apps/remote-banner && pnpm run dev
 ```
 
-6. Start nginx:
+6. Shared remote web-vitals-reporter app:
+
+```bash
+cd ./apps/remote-web-vitals-reporter && pnpm run dev
+```
+
+7. Start nginx:
 
 ```bash
 [sudo] nginx -c %ABSOLUTE_PATH_TO_THIS_FOLDER%/reverse-proxy.conf
@@ -162,7 +189,7 @@ You can now navigate to http://localhost:8080/home and http://localhost:8080/blo
 
 If you open the console and reload the page, you will see the web vitals reporting coming from the remote web-vitals-reporter module.
 
-7. Stop nginx with
+8. Stop nginx with
 
 ```bash
 [sudo] nginx -c %ABSOLUTE_PATH_TO_THIS_FOLDER%/reverse-proxy.conf -s quit
