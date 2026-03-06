@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [
     federation({
       name: "homepage",
+      dts: false,
       remotes: {
         banner: {
           type: "module",

@@ -14,6 +14,7 @@ export default defineConfig({
       exposes: {
         ".": "./src/main.ts",
       },
+      dts: false,
     }),
   ],
 });
