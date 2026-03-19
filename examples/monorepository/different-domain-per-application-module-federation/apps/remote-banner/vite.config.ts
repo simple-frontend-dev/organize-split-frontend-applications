@@ -14,7 +14,14 @@ export default defineConfig({
       exposes: {
         ".": "./src/main.ts",
       },
-      dts: false,
+      remotes: {
+        "tools-shell": {
+          type: "module",
+          name: "tools-shell",
+          entry: "http://localhost:2002/tools-shell.js",
+          entryGlobalName: "tools-shell",
+        },
+      },
     }),
   ],
 });

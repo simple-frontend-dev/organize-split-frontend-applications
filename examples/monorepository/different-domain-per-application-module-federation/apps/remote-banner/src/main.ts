@@ -16,3 +16,12 @@ export const Banner = ({
   banner.style.height = "100px";
   return banner;
 };
+
+try {
+  const { isFeatureEnabled, measureModuleLoadTime } =
+    await import("tools-shell");
+  measureModuleLoadTime("banner");
+  console.log(isFeatureEnabled("feature-1"));
+} catch (error) {
+  console.error("Unable to load tools-shell module: ", error);
+}

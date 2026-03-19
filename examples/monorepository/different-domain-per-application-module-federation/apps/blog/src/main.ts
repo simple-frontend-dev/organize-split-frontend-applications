@@ -18,8 +18,17 @@ try {
     Banner({
       text: "Runtime shared banner module",
       backgroundColor: "darkorange",
-    })
+    }),
   );
 } catch (error) {
   console.error("Unable to load banner module: ", error);
+}
+
+try {
+  const { isFeatureEnabled, measureModuleLoadTime } =
+    await import("tools-shell");
+  measureModuleLoadTime("blog");
+  console.log(isFeatureEnabled("feature-1"));
+} catch (error) {
+  console.error("Unable to load tools-shell module: ", error);
 }

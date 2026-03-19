@@ -3,14 +3,14 @@ import { federation } from "@module-federation/vite";
 
 export default defineConfig({
   server: {
-    origin: "http://localhost:2001",
-    port: 2001,
+    origin: "http://localhost:2002",
+    port: 2002,
   },
-  base: "http://localhost:2001",
+  base: "http://localhost:2002",
   plugins: [
     federation({
-      name: "web-vitals-reporter",
-      filename: "web-vitals-reporter.js",
+      name: "tools-shell",
+      filename: "tools-shell.js",
       exposes: {
         ".": "./src/main.ts",
       },

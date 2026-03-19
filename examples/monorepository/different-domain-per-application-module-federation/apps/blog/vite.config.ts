@@ -5,7 +5,6 @@ export default defineConfig({
   plugins: [
     federation({
       name: "blog",
-      dts: false,
       remotes: {
         banner: {
           type: "module",
@@ -18,6 +17,12 @@ export default defineConfig({
           name: "web-vitals-reporter",
           entry: "http://localhost:2001/web-vitals-reporter.js",
           entryGlobalName: "remote-web-vitals-reporter",
+        },
+        "tools-shell": {
+          type: "module",
+          name: "tools-shell",
+          entry: "http://localhost:2002/tools-shell.js",
+          entryGlobalName: "tools-shell",
         },
       },
     }),
